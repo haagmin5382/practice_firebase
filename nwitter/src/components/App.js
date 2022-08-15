@@ -5,12 +5,13 @@ import { authService } from "fbase";
 function App() {
   const [init, setInit] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userObj, setUserObj] = useState(null);
 
   useEffect(() => {
     authService.onAuthStateChanged((user) => {
       if (user) {
         setIsLoggedIn(true);
-        setInit(true);
+        setUserObj(user);
       } else {
         setIsLoggedIn(false);
       }
@@ -21,10 +22,14 @@ function App() {
   // setInterval(() => {
   //   // console.log(authService.currentUser); // 인증하는데 시간이 걸린다.
   // }, 2000);
-  console.log(init); // authService.onAuthStateChanged 때문에 init의 상태 값이 true로 바뀌면서 <AppRouter> 컴포넌트가 나오게 된다.
+  // console.log(init); // authService.onAuthStateChanged 때문에 init의 상태 값이 true로 바뀌면서 <AppRouter> 컴포넌트가 나오게 된다.
   return (
     <>
-      {init ? <AppRouter isLoggedIn={isLoggedIn} /> : "Initializing ..."}
+      {init ? (
+        <AppRouter isLoggedIn={isLoggedIn} userObj={userObj} />
+      ) : (
+        "Initializing ..."
+      )}
       <footer>&copy; {new Date().getFullYear()} Nwitter</footer>
     </>
   );
