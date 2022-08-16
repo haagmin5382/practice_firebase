@@ -3,6 +3,8 @@ import { dbService, storageService } from "fbase";
 import { v4 as uuidv4 } from "uuid";
 import { addDoc, collection } from "firebase/firestore";
 import { getDownloadURL, ref, uploadString } from "firebase/storage";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPlus, faTimes } from "@fortawesome/free-solid-svg-icons";
 
 const NweetFactory = ({ userObj }) => {
   const [nweet, setNweet] = useState("");
@@ -15,7 +17,11 @@ const NweetFactory = ({ userObj }) => {
     if (attachment) {
       // 사진을 게시한 글을 업로드 할 경우를 대비
       const attachmentRef = ref(storageService, `${userObj.uid}/${uuidv4()}`);
-      await uploadString(attachmentRef, attachment, "data_url"); // format : data_url
+      // 구글 클라우드 스토리지 오브젝트에 대한 참조를 나타낸다 (bucket)
+      // 이미지의 path를 넣어준다. (reference에서 폴더를 만들어 넣어주는 역할 firebase console storage 참조)
+
+      await uploadString(attachmentRef, attachment, "data_url");
+      // format : data_url
       // 게시한 이미지를 storage에 저장한다.
       attachmentURL = await getDownloadURL(ref(storageService, attachmentRef));
     }
@@ -67,20 +73,45 @@ const NweetFactory = ({ userObj }) => {
 
   return (
     <>
-      <form>
+      <form onSubmit={onSubmit} className="factoryForm">
+        <div className="factoryInput__container">
+          <input
+            className="factoryInput__input"
+            value={nweet}
+            onChange={onChange}
+            type="text"
+            placeholder="What's on your mind?"
+            maxLength={120}
+          />
+          <input type="submit" value="&rarr;" className="factoryInput__arrow" />
+        </div>
+        <label htmlFor="attach-file" className="factoryInput__label">
+          <span>Add photos</span>
+          <FontAwesomeIcon icon={faPlus} />
+        </label>
         <input
-          type="text"
-          placeholder="What's on your mind"
-          maxLength={120}
-          value={nweet}
-          onChange={onChange}
+          id="attach-file"
+          type="file"
+          accept="image/*"
+          onChange={onFileChange}
+          style={{
+            opacity: 0,
+          }}
         />
-        <input type="file" accept="image/*" onChange={onFileChange} />
         <input type="submit" value="Nweet" onClick={onSubmit} />
         {attachment && (
-          <div>
-            <img alt="attachment" src={attachment} width="50px" height="50px" />
-            <button onClick={onClearAttachment}>Clear Photo</button>
+          <div className="factoryForm__attachment">
+            <img
+              alt="attachment"
+              src={attachment}
+              style={{
+                backgroundImage: attachment,
+              }}
+            />
+            <div className="factoryForm__clear" onClick={onClearAttachment}>
+              <span>Remove</span>
+              <FontAwesomeIcon icon={faTimes} />
+            </div>
           </div>
         )}
       </form>

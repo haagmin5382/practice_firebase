@@ -2,6 +2,8 @@ import { dbService, storageService } from "fbase";
 import { deleteDoc, doc, updateDoc } from "firebase/firestore";
 import { deleteObject, ref } from "firebase/storage";
 import React, { useState } from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faTrash, faPencilAlt } from "@fortawesome/free-solid-svg-icons";
 
 const Nweet = ({ nweetObj, isOwner }) => {
   const [editing, setEditing] = useState(false); // edit모드로 바꿀지 여부
@@ -24,6 +26,8 @@ const Nweet = ({ nweetObj, isOwner }) => {
 
   const toggleEditing = () => {
     setEditing((prev) => !prev);
+    setNewNweet(nweetObj.text);
+    setNewNweetPhoto(nweetObj.attachmentURL);
   };
 
   const editNweet = (e) => {
@@ -66,10 +70,23 @@ const Nweet = ({ nweetObj, isOwner }) => {
   };
 
   return (
-    <div>
+    <div className="nweet">
       {editing ? (
         <>
-          <form>
+          <form className=" editContainer nweetEdit">
+            <img
+              alt="newNweetPhoto"
+              src={newNweetPhoto}
+              width="200"
+              height="200"
+            />
+            <input
+              id="update-photo"
+              type="file"
+              accept="image/*"
+              onChange={editPhoto}
+              style={{ display: "none" }}
+            />
             <input
               type="text"
               placeholder="Edit your Nweet"
@@ -77,40 +94,57 @@ const Nweet = ({ nweetObj, isOwner }) => {
               required
               onChange={editNweet}
             />
-            <input type="file" accept="image/*" onChange={editPhoto} />
-            <input
-              onClick={submitEditedNweet}
-              type="submit"
-              value="Update Nweet"
-            />
+
+            <div>
+              <input
+                onClick={submitEditedNweet}
+                type="submit"
+                value="Update Nweet"
+                className="formBtn"
+              />
+              {nweetObj.attachmentURL && (
+                <label htmlFor="update-photo">
+                  <div className="formBtn">change Photo</div>
+                </label>
+              )}
+              <div
+                onClick={clearPhoto}
+                className="formBtn"
+                style={{
+                  marginBottom: "10px",
+                  backgroundColor: "#FFC6B4",
+                }}
+              >
+                Clear photo
+              </div>
+              <div onClick={toggleEditing} className="formBtn cancelBtn">
+                Cancel
+              </div>
+            </div>
           </form>
-          <img
-            alt="newNweetPhoto"
-            src={newNweetPhoto}
-            width="200"
-            height="200"
-          />
-          <button onClick={clearPhoto}>Clear photo</button>
-          <button onClick={toggleEditing}>Cancel</button>
         </>
       ) : (
-        <>
-          <h4>{nweetObj.text}</h4>
+        <div className="GridContainer">
           {nweetObj.attachmentURL && (
             <img
               alt="attachmentURL"
               src={nweetObj.attachmentURL}
-              width="400px"
-              height="400px"
+              width="200px"
+              height="200px"
             />
           )}
+          <h4>{nweetObj.text}</h4>
           {isOwner && (
-            <>
-              <button onClick={onDeleteClick}>Delete Nweet</button>
-              <button onClick={toggleEditing}>Edit Nweet</button>
-            </>
+            <div className="nweet__actions">
+              <span onClick={onDeleteClick}>
+                <FontAwesomeIcon icon={faTrash} />
+              </span>
+              <span onClick={toggleEditing}>
+                <FontAwesomeIcon icon={faPencilAlt} />
+              </span>
+            </div>
           )}
-        </>
+        </div>
       )}
     </div>
   );
